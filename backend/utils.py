@@ -36,7 +36,7 @@ def get_author_by_ID(request, author_id, label):
 		return author, False
 
 
-def add_post(request, author,id=None):
+def add_post(request, author,id=None, isLocal=False):
 
 	body = json.loads(request.body.decode('utf-8'))
 
@@ -56,6 +56,22 @@ def add_post(request, author,id=None):
 			visibility = body["visibility"],
 			unlisted = body["unlisted"]
 		)
+	# If a new post is sent to our server
+	elif not isLocal and id is not None:
+		post = Post(
+				id = id,
+				author = author,
+				title = body["title"],
+				host = HOSTNAME,
+				source = "https://" + body["source"].split('/')[2] + "/author/"+author.id+"/posts/"+id,
+				origin = body["origin"],
+				description = body["description"],
+				contentType = body["contentType"],
+				categories = body["categories"],
+				visibility = body["visibility"],
+				unlisted = body["unlisted"]
+			)
+
 	else:
 		# If we're sharing a remote post
 		if id:
