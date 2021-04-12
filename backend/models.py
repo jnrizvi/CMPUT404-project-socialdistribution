@@ -74,3 +74,4 @@ class Inbox(models.Model):
 	follow = models.ForeignKey(Follow, on_delete=models.CASCADE, blank=True, null=True, related_name='follow')
 	like = models.ForeignKey(Like, on_delete=models.CASCADE, blank=True, null=True, related_name='like')
 	icomment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True, related_name='icomment')
+	published = models.DateTimeField(auto_now_add=True)

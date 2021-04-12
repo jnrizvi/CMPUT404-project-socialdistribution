@@ -46,25 +46,39 @@ class InboxAPI(viewsets.ModelViewSet):
 				self.pagination_class = ResultsPagination
 
 				# Find follows, posts, likes, and comments from the inbox table that belong to this author
-				follows_list = Inbox.objects.filter(author=author_id, follow__isnull=False)
-				posts_list = Inbox.objects.filter(author=author_id, post__isnull=False)
-				likes_list = Inbox.objects.filter(author=author_id, like__isnull=False)
-				comments_list = Inbox.objects.filter(author=author_id, icomment__isnull=False)
+				#follows_list = Inbox.objects.filter(author=author_id, follow__isnull=False)
+				#posts_list = Inbox.objects.filter(author=author_id, post__isnull=False)
+				#likes_list = Inbox.objects.filter(author=author_id, like__isnull=False)
+				#comments_list = Inbox.objects.filter(author=author_id, icomment__isnull=False)
 
 				# Find the full follow, post, like, and comment objects in their respective tables
-				follows = Follow.objects.filter(follow__in=follows_list)
-				posts = Post.objects.filter(post__in=posts_list)
-				likes = Like.objects.filter(like__in=likes_list)
-				comments = Comment.objects.filter(comment__in=comments_list)
+				#follows = Follow.objects.filter(follow__in=follows_list)
+				#posts = Post.objects.filter(post__in=posts_list)
+				#likes = Like.objects.filter(like__in=likes_list)
+				#comments = Comment.objects.filter(comment__in=comments_list)
 
 				# Serialize the returned rows from each table
-				post_serializer = PostSerializer(posts, many=True, remove_fields={'size'})
-				follow_serializer = FollowSerializer(follows, many=True)
-				like_serializer = LikeSerializer(likes, many=True, context={'request': request})
-				comment_serializer = CommentSerializer(comments, many=True)
+				#post_serializer = PostSerializer(posts, many=True, remove_fields={'size'})
+				#follow_serializer = FollowSerializer(follows, many=True)
+				#like_serializer = LikeSerializer(likes, many=True, context={'request': request})
+				#comment_serializer = CommentSerializer(comments, many=True)
+
+				inbox_items = Inbox.objects.filter(author=author_id).order_by('-published')
+
+				serialized_data = []
+
+				for item in inbox_items.iterator():
+					if item.follow is not None:
+						serialized_data.append(FollowSerializer(item.follow).data)
+					elif item.like is not None:
+						serialized_data.append(LikeSerializer(item.like, context={'request': request}).data)
+					elif item.icomment is not None:
+						serialized_data.append(CommentSerializer(item.icomment).data)
+					elif item.post is not None:
+						serialized_data.append(PostSerializer(item.post, remove_fields={'size'}).data)
 
 				# Paginate the returned data from all of the serializers
-				paginated_serializer_data = self.paginate_queryset(follow_serializer.data+like_serializer.data+post_serializer.data+comment_serializer.data)
+				paginated_serializer_data = self.paginate_queryset(serialized_data)
 
 				# Return the inbox
 				return Response({
@@ -194,7 +208,6 @@ class InboxAPI(viewsets.ModelViewSet):
 
 			# Respond with a 201 created
 			return Response(data="Like sent to inbox", status=status.HTTP_201_CREATED)
-
 		# If the sent object is of type Post
 		elif body['type'].lower() == 'post':
 			# Get or create a local copy of the author of the post
@@ -204,7 +217,7 @@ class InboxAPI(viewsets.ModelViewSet):
 				return Response(data=str(e), status=status.HTTP_400_BAD_REQUEST)
 			# Get or create a local copy of the post
 			try:
-				post, post_data, exists = utils.add_post(request, post_author, body['id'].split('/')[-1])
+				post, post_data, exists = utils.add_post(request, post_author, body['id'].split('/')[-1], isLocal=isLocal)
 			except Exception as e:
 				return Response(data=str(e), status=status.HTTP_400_BAD_REQUEST)
 			# Add the post to the inbox
