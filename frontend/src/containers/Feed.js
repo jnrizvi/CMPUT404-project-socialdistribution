@@ -68,7 +68,7 @@ function Feed(props) {
     }
 
     const createNewPost = (post, privatePerson) => {
-        const description = 'this is a text post';
+        const description = 'this is a post';
         const finalPost = {
             ...post,
             author: props.author,

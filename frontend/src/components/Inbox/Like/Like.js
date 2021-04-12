@@ -22,6 +22,7 @@ const useStyles = makeStyles(() => ({
 
 export default function Like(props) {
     const classes = useStyles();
+    console.log(props.data);
     return (
         <div className={classes.root}>
             <p className={classes.summary}>{ props.data.summary }</p>
