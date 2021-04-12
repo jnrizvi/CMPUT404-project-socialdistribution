@@ -22,7 +22,8 @@ import {
     POST_PRIVATE_POST,
     DELETE_FRIEND,
     GET_FOLLOWING,
-    POST_COMMENT_LIKE
+    POST_COMMENT_LIKE,
+    GET_COMMENTS
 } from '../../actions/types';
 
 import { withAlert } from 'react-alert';
@@ -76,6 +77,10 @@ export class Alerts extends Component {
                         return alert.error(`${error.status} Error: Cannot get following`);    
                     case POST_COMMENT_LIKE:
                         return alert.error(`${error.status} Error: Cannot like comment`);        
+                    case GET_COMMENTS:
+                        return alert.error(`${error.status} Error: Cannot get comments`);          
+                    case POST_UPDATE_PROFILE:
+                        return alert.error(`${error.status} Error: Cannot Update Profile`);      
                     default:
                         return alert.error(`${error.status} Error`);
                 }
@@ -100,7 +105,9 @@ export class Alerts extends Component {
                     case DELETE_FRIEND:
                         return alert.success(`Unfriend Successful`);        
                     case POST_COMMENT_LIKE:
-                        return alert.success(`Comment Liked`);                  
+                        return alert.success(`Comment Liked`);   
+                    case POST_UPDATE_PROFILE:
+                        return alert.success(`Profile Updated`);   
                     default:
                         return alert.success(`Success`);
                 }

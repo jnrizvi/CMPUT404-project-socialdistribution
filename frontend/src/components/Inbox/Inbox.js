@@ -15,14 +15,14 @@ export default function Inbox(props) {
                 return <Post
                             key={i}
                             postData={d}
-                            onLikeClicked={props.postLiked}
+                            postLiked={props.postLiked}
+                            commentLiked={props.commentLiked}
                             author={props.author}
                             createComment={props.createComment}
-                            getLikes={props.getLikes}
                             sharePost={props.sharePost}
                             editMode={false}
                             likes={props.likes[conversion.join('/')]}
-                            likeClicked={props.likeClicked}
+                            comments={props.comments[d.id]}
                         />;
             } else if (d.type === 'like') {
                 return <Like key={i} data={d}/>;

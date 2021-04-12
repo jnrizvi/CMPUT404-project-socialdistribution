@@ -12,7 +12,7 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost } from "../actions/posts";
+import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments } from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -94,7 +94,7 @@ function Feed(props) {
         props.postLike(body, post.author, props.token);
     }
 
-    const commentLikeClicked = (comment) => {
+    const commentLiked = (comment) => {
         const body = {
             '@context': "https://www.w3.org/ns/activitystreams",
             summary: `${props.author.displayName} Likes your comment`,
@@ -106,17 +106,11 @@ function Feed(props) {
     }
 
     const createComment = (body, post) => {
-        props.postComment(body, post, props.token);
-    }
-
-    const getLikes = (url) => {
-        // props.getLikes(url, props.token);
+        props.postComment(body, post, props.token, !body.comments.includes('team6-project-socialdistrib'));
     }
 
     const sharePost = (post) => {
-        props.friends.items.forEach( d => {
-            props.postSharePost(post, props.token, d);
-        });
+        props.postSharePost(post, props.token, props.author_id);
     }
 
     const unfriend = (friend) => {
@@ -149,6 +143,11 @@ function Feed(props) {
                             id: post.join('/')
                         }, props.token);
                     }
+
+                    // get comments of each post
+                    if (d.type === 'post') {
+                        props.getComments(d, props.token);
+                    }
                 });
             }
         }
@@ -170,11 +169,11 @@ function Feed(props) {
                             author={props.author}
                             postFriendRequest={postFriendRequest}
                             postLiked={postLiked}
+                            commentLiked={commentLiked}
                             createComment={createComment}
-                            getLikes={getLikes}
                             sharePost={sharePost}
                             likes={props.likes}
-                            likeClicked={commentLikeClicked}
+                            comments={props.comments}
                         />
                     </div>
                     <div className='col-3 ps-5'>
@@ -216,7 +215,8 @@ const mapStateToProps = (state) => ({
     followers: state.users.followers,
     token: state.users.basic_token,
     following: state.users.following,
-    likes: state.posts.likes
+    likes: state.posts.likes,
+    comments: state.posts.comments
 });
   
 export default connect(mapStateToProps,
@@ -234,5 +234,6 @@ export default connect(mapStateToProps,
         postSharePost,
         postNewPrivatePost,
         deleteFriend,
-        getFollowing
+        getFollowing,
+        getComments
     })(Feed);

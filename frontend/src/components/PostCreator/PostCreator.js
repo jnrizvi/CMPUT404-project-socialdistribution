@@ -71,7 +71,18 @@ const useStyles = makeStyles(() => ({
     searchPeopleResult: {
         position: 'absolute',
         backgroundColor: 'white',
-        zIndex: '100'
+        zIndex: '100',
+        maxHeight: '11em',
+		overflow: 'scroll',
+		scrollbarWidth: 'none',
+        boxShadow: '2px 2px 4px',
+		'&::-webkit-scrollbar': {
+            display: 'none'
+        }
+    },
+    image: {
+        width: '100%',
+        maxWidth: '600px'
     }
 }));
 
@@ -86,6 +97,7 @@ export default function PostCreator(props) {
     const [people, setPeople] = useState(props.allAuthors.map((d, i) => <Person key={i} person={d} addClicked={addPersonClicked}/>));
     const [privatePerson, setPrivatePerson] = useState('');
     const [unlisted, setUnlisted] = useState(false);
+    const [searchTextState, setSearchTextState] = useState('');
 
     let searchText = '';
 
@@ -122,6 +134,7 @@ export default function PostCreator(props) {
             categories: tags,
             unlisted
         });
+        clearTextFields();
     }
 
     const addPersonClicked = (person) => {
@@ -146,6 +159,7 @@ export default function PostCreator(props) {
                 break;
             case 'textSearch':
                 searchText = e.target.value;
+                setSearchTextState(e.target.value);
                 const data = _.filter(props.allAuthors, d => d.displayName.includes(searchText));
                 setPeople(data.map((d, i) => 
                     <Person
@@ -192,12 +206,13 @@ export default function PostCreator(props) {
                 rows={6}
                 placeholder='Write Something ...'
                 fullWidth
+                value={content}
             />;
         } else if (type ==='image/png' || type === 'image/jpeg') {
             let image_block = null;
 
             if (content.startsWith('data:image/') || (content.match(/\.(jpeg|jpg|png)$/) != null)) {
-                image_block = <img src={content} alt='postimage'/>;
+                image_block = <img className={classes.image} src={content} alt='postimage'/>;
             }
 
             block = <div>
@@ -207,12 +222,23 @@ export default function PostCreator(props) {
                     placeholder='URL'
                     fullWidth
                     id='textURL'
+                    value={content}
                 />
                 { image_block }
             </div>;
         }
         
         return block;
+    }
+
+    const clearTextFields = () => {
+        setVisibility('default');
+        setType('default');
+        setTitle('');
+        setContent('');
+        setTags([]);
+        setPrivatePerson('');
+        setUnlisted(false);    
     }
   
     return (
@@ -227,6 +253,7 @@ export default function PostCreator(props) {
                 placeholder='Title'
                 fullWidth
                 id='textTitle'
+                value={title}
             />
             { contentBlock() }
             <InputBase
@@ -235,11 +262,12 @@ export default function PostCreator(props) {
                 placeholder='Tags (separate with commas)'
                 fullWidth
                 id='textTags'
+                value={tags}
             />
             <div className={classes.controls}>
                 <FormControl component="fieldset">
                     <FormControlLabel
-                        value="unlisted"
+                        value={unlisted}
                         control={<Checkbox color="primary" onChange={unlistedChangeHandler}/>}
                         label="Unlisted"
                         labelPlacement="end"
@@ -251,6 +279,7 @@ export default function PostCreator(props) {
                         onChange={dropdownOnClickHandler}
                         className={classes.visibility}
                         name='content-type'
+                        value={type}
                     >
                         <MenuItem value='default' disabled>
                             <em>Content Type</em>
@@ -267,6 +296,7 @@ export default function PostCreator(props) {
                         onChange={dropdownOnClickHandler}
                         className={classes.visibility}
                         name='visibility'
+                        value={visibility}
                     >
                         <MenuItem value='default' disabled>
                             <em>Who can see this</em>
@@ -284,6 +314,7 @@ export default function PostCreator(props) {
                             onChange={onTextChange}
                             placeholder='Search for someone'
                             id='textSearch'
+                            value={searchTextState}
                         />
                         <div className={classes.searchPeopleResult}>{ people }</div>
                     </div>
