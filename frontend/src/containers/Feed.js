@@ -110,7 +110,6 @@ function Feed(props) {
     }
 
     const sharePost = (post) => {
-        console.log(props);
         props.postSharePost(post, props.token, props.author_id);
     }
 
