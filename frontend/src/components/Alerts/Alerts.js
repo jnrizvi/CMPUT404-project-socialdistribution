@@ -23,7 +23,8 @@ import {
     DELETE_FRIEND,
     GET_FOLLOWING,
     POST_COMMENT_LIKE,
-    GET_COMMENTS
+    GET_COMMENTS,
+    DESTROY_INBOX
 } from '../../actions/types';
 
 import { withAlert } from 'react-alert';
@@ -81,6 +82,8 @@ export class Alerts extends Component {
                         return alert.error(`${error.status} Error: Cannot get comments`);          
                     case POST_UPDATE_PROFILE:
                         return alert.error(`${error.status} Error: Cannot Update Profile`);      
+                    case DESTROY_INBOX:
+                        return alert.error(`${error.status} Error: Cannot Destroy Inbox`);          
                     default:
                         return alert.error(`${error.status} Error`);
                 }
@@ -110,6 +113,8 @@ export class Alerts extends Component {
                         return alert.success(`Profile Updated`);   
                     case POST_REGISTER:
                         return alert.success(`Registration Successful. Pending Admin Approval`);    
+                    case DESTROY_INBOX:
+                        return alert.success(`Inbox Destroyed`);        
                     default:
                         return alert.success(`Success`);
                 }

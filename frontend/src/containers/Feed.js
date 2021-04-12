@@ -12,7 +12,7 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments } from "../actions/posts";
+import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments, destroyInbox } from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -68,7 +68,7 @@ function Feed(props) {
     }
 
     const createNewPost = (post, privatePerson) => {
-        const description = 'this is a text post';
+        const description = 'this is a post';
         const finalPost = {
             ...post,
             author: props.author,
@@ -106,7 +106,7 @@ function Feed(props) {
     }
 
     const createComment = (body, post) => {
-        props.postComment(body, post, props.token, !body.comments.includes(props.author.host));
+        props.postComment(body, post, props.token);
     }
 
     const sharePost = (post) => {
@@ -115,6 +115,10 @@ function Feed(props) {
 
     const unfriend = (friend) => {
         props.deleteFriend(props.author, friend, props.token);
+    }
+
+    const deleteInbox = () => {
+        props.destroyInbox(props.author_id, props.token);
     }
 
     React.useEffect(() => {
@@ -174,6 +178,7 @@ function Feed(props) {
                             sharePost={sharePost}
                             likes={props.likes}
                             comments={props.comments}
+                            deleteInbox={deleteInbox}
                         />
                     </div>
                     <div className='col-3 ps-5'>
@@ -235,5 +240,6 @@ export default connect(mapStateToProps,
         postNewPrivatePost,
         deleteFriend,
         getFollowing,
-        getComments
+        getComments,
+        destroyInbox
     })(Feed);

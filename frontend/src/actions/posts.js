@@ -14,7 +14,8 @@ import {
     PUT_UPDATE_POST,
     POST_PRIVATE_POST,
     POST_COMMENT_LIKE,
-    GET_COMMENTS
+    GET_COMMENTS,
+    DESTROY_INBOX
 } from './types';
 import _ from 'lodash';
 import { returnErrors } from './messages';
@@ -178,8 +179,8 @@ export const postCommentLike = (body, author, token) => dispatch => {
     });
 }
 
-export const postComment = (body, post, token, isRemote) => dispatch => {
-    axios.post(`/author/${_.last(post.author.id.split('/'))}/posts/${_.last(post.id.split('/'))}/comments${ isRemote ? '/remote' : ''}`, body, {
+export const postComment = (body, post, token) => dispatch => {
+    axios.post(`/author/${_.last(post.author.id.split('/'))}/posts/${_.last(post.id.split('/'))}/comments`, body, {
         headers: {
             'Authorization': `Basic ${token}`
         }
@@ -362,6 +363,32 @@ export const getComments = (item, token) => dispatch => {
         const errors = {
             msg: err.response.data,
             origin: GET_COMMENTS,
+            status: err.response.status
+        }
+        dispatch({
+            type: GET_ERRORS,
+            payload: errors
+        })
+    });
+}
+
+export const destroyInbox = (authorId, token) => dispatch => {
+    axios.delete(`author/${authorId}/inbox`, {
+        headers: {
+            'Authorization': `Basic ${token}`
+        }
+    }).then(res => {
+        dispatch({
+            type: GET_SUCCESS,
+            payload: {
+                status: 200,
+                origin: DESTROY_INBOX
+            }
+        });
+    }).catch(err => {
+        const errors = {
+            msg: err.response.data,
+            origin: DESTROY_INBOX,
             status: err.response.status
         }
         dispatch({
