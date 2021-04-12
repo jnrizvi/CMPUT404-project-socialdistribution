@@ -34,7 +34,7 @@ const useStyles = makeStyles(() => ({
     container: {
         padding: '0px 10%'
     }
-  }));
+}));
 
 // pretend this is my author id to tell between my posts and others' posts
 // const stuffFromAuthContext = {
