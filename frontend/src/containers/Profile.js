@@ -143,6 +143,7 @@ function Profile(props) {
 
 const mapStateToProps = (state) => ({
     author: state.users.user,
+    author_id: state.users.user_id,
     token: state.users.basic_token,
     personal_posts: state.posts.personal_posts,
     comments: state.posts.comments

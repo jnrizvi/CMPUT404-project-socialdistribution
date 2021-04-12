@@ -231,7 +231,7 @@ export default function Post(props) {
 
     const onTextChange = (e) => {
         switch (e.target.id) {
-            case postData.id:
+            case 'commentText':
                 comment = e.target.value;
                 break;
             case 'editTitle':
@@ -253,6 +253,7 @@ export default function Post(props) {
     }
 
     const sendCommentHandler = (e) => {
+        console.log(comment);
         props.createComment({
             type: 'comment',
             author: props.author,
@@ -344,7 +345,7 @@ export default function Post(props) {
                             onChange={onTextChange}
                             placeholder='Add a comment'
                             fullWidth
-                            id={postData.id}
+                            id='commentText'
                         />
                         <div
                             className={classes.sendButton}
