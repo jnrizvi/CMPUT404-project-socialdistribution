@@ -12,7 +12,7 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments } from "../actions/posts";
+import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments, destroyInbox } from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -117,6 +117,10 @@ function Feed(props) {
         props.deleteFriend(props.author, friend, props.token);
     }
 
+    const deleteInbox = () => {
+        props.destroyInbox(props.author_id, props.token);
+    }
+
     React.useEffect(() => {
         if (_.isEmpty(props.author)) {
             history.push("/login");
@@ -174,6 +178,7 @@ function Feed(props) {
                             sharePost={sharePost}
                             likes={props.likes}
                             comments={props.comments}
+                            deleteInbox={deleteInbox}
                         />
                     </div>
                     <div className='col-3 ps-5'>
@@ -235,5 +240,6 @@ export default connect(mapStateToProps,
         postNewPrivatePost,
         deleteFriend,
         getFollowing,
-        getComments
+        getComments,
+        destroyInbox
     })(Feed);

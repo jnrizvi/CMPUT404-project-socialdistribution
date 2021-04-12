@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 
 import Post from '../Post/Post';
 import FollowRequest from './FollowRequest/FollowRequest';
 import Like from './Like/Like';
 
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+const useStyles = makeStyles((theme) => ({
+    button: {
+      margin: theme.spacing(1),
+    },
+  }));
+  
+
 export default function Inbox(props) {
+
+    const classes = useStyles();
+
     const inbox = props.data.items !== undefined
         ? props.data.items.map((d, i) => {
             if (d.type === 'Follow') {
@@ -32,6 +46,15 @@ export default function Inbox(props) {
     
     return (
         <div>
+            <Button
+                variant="contained"
+                color="default"
+                className={classes.button}
+                startIcon={<DeleteIcon />}
+                onClick={props.deleteInbox}
+            >
+                Destroy Inbox
+            </Button>
             {inbox}
         </div>
     );
