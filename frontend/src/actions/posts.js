@@ -103,8 +103,8 @@ export const postNewPrivatePost = (post, recipient, token) => dispatch => {
 }
 
 // Get all posts for activity feed
-export const getInbox = (authorId, token) => dispatch => {
-    axios.get(`/author/${authorId}/inbox`, {
+export const getInbox = (authorId, token, page) => dispatch => {
+    axios.get(`/author/${authorId}/inbox?page=${page}`, {
         headers: {
             'Authorization': `Basic ${token}`
         }
@@ -344,9 +344,9 @@ export const putUpdatePost = (post, token) => dispatch => {
     });
 }
 
-export const getComments = (item, token) => dispatch => {
+export const getComments = (item, token, page, isRemote) => dispatch => {
     const items = item.id.split('/');
-    axios.get(`/author/${items[items.length-3]}/posts/${items[items.length-1]}/comments`, {
+    axios.get(`/author/${items[items.length-3]}/posts/${items[items.length-1]}/comments${ isRemote ? '/remote' : '' }?page=${page}&size=10`, {
         headers: {
             'Authorization': `Basic ${token}`
         }

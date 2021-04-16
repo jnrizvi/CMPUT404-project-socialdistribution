@@ -53,10 +53,11 @@ function Feed(props) {
     
     const [loaded, setLoaded] = useState(false);
     const [likesLoaded, setLikesLoaded] = useState(false);
+    const [inboxPage, setInboxPage] = useState(1);
 
     const initialLoad = () => {
         if (!loaded) {
-            props.getInbox(props.author_id, props.token);
+            props.getInbox(props.author_id, props.token, inboxPage);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -65,6 +66,20 @@ function Feed(props) {
             props.postSearchDisplayName(props.token);
             setLoaded(true);
         }
+    }
+
+    const inboxPaginationHandler = (direction) => {
+        if (direction === 'left' && inboxPage !== 1) {
+            setInboxPage(inboxPage - 1);
+            props.getInbox(props.author_id, props.token, inboxPage-1);
+        } else if (direction === 'right') {
+            setInboxPage(inboxPage + 1);
+            props.getInbox(props.author_id, props.token, inboxPage+1);
+        }
+    }
+
+    const commentPaginationHandler = (direction, post, page) => {
+        props.getComments(post, props.token, page, !post.id.includes(props.author.host));
     }
 
     const createNewPost = (post, privatePerson) => {
@@ -150,7 +165,7 @@ function Feed(props) {
 
                     // get comments of each post
                     if (d.type === 'post') {
-                        props.getComments(d, props.token);
+                        props.getComments(d, props.token, 1, !d.id.includes(props.author.host));
                     }
                 });
             }
@@ -179,6 +194,9 @@ function Feed(props) {
                             likes={props.likes}
                             comments={props.comments}
                             deleteInbox={deleteInbox}
+                            inboxPage={inboxPage}
+                            inboxPaginationHandler={inboxPaginationHandler}
+                            commentPaginationHandler={commentPaginationHandler}
                         />
                     </div>
                     <div className='col-3 ps-5'>
