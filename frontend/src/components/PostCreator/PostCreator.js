@@ -9,6 +9,7 @@ import InputBase from '@material-ui/core/InputBase';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import PhotoIcon from '@material-ui/icons/Photo';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import IconButton from '@material-ui/core/IconButton';
@@ -83,6 +84,9 @@ const useStyles = makeStyles(() => ({
     image: {
         width: '100%',
         maxWidth: '600px'
+    },
+    photoIcon: {
+        color: '#D1305E'
     }
 }));
 
@@ -325,8 +329,8 @@ export default function PostCreator(props) {
                 }
                 <input className={classes.input} id="icon-button-file" type="file" onChange={onImageUpload}/>
                 <label htmlFor="icon-button-file">
-                    <IconButton color="primary" aria-label="upload picture" component="span">
-                        <PhotoCamera />
+                    <IconButton className={classes.photoIcon} color="default" aria-label="upload picture" component="span" fontSize="large">
+                        <PhotoIcon />
                     </IconButton>
                 </label>
                 <div
