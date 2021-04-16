@@ -12,7 +12,19 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments, destroyInbox } from "../actions/posts";
+import {
+    postNewPost,
+    getInbox,
+    postLike,
+    postComment,
+    getLikes,
+    postSharePost,
+    postNewPrivatePost,
+    getComments,
+    destroyInbox,
+    getPublicPosts
+}
+from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -58,6 +70,7 @@ function Feed(props) {
     const initialLoad = () => {
         if (!loaded) {
             props.getInbox(props.author_id, props.token, inboxPage);
+            props.getPublicPosts(props.token);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -149,10 +162,10 @@ function Feed(props) {
             }
         }
 
-        if (!_.isEmpty(props.inbox)) {
+        if (!_.isEmpty(props.inbox) && !_.isEmpty(props.publicPosts)) {
             if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
                 setLikesLoaded(true);
-                _.forEach(props.inbox.items, d => {
+                _.forEach(props.inbox.items.concat(props.publicPosts), d => {
                     if (d.type === 'post' && d.visibility === 'FRIENDS') {
                         const post = d.id.split('/');
                         post[5] = 'post';
@@ -184,7 +197,8 @@ function Feed(props) {
                         <PostSorter />
                         <GithubStream activities={props.github_activity}/>
                         <Inbox
-                            data={props.inbox}
+                            inbox={props.inbox}
+                            publicPosts={props.publicPosts}
                             author={props.author}
                             postFriendRequest={postFriendRequest}
                             postLiked={postLiked}
@@ -239,7 +253,8 @@ const mapStateToProps = (state) => ({
     token: state.users.basic_token,
     following: state.users.following,
     likes: state.posts.likes,
-    comments: state.posts.comments
+    comments: state.posts.comments,
+    publicPosts: state.posts.publicPosts
 });
   
 export default connect(mapStateToProps,
@@ -259,5 +274,6 @@ export default connect(mapStateToProps,
         deleteFriend,
         getFollowing,
         getComments,
-        destroyInbox
+        destroyInbox,
+        getPublicPosts
     })(Feed);
