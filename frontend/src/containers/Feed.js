@@ -161,7 +161,7 @@ function Feed(props) {
 
                     // get comments of each post
                     if (d.type === 'post') {
-                        props.getComments(d, props.token);
+                        props.getComments(d, props.token, 1, !d.id.includes(props.author.host));
                     }
                 });
             }

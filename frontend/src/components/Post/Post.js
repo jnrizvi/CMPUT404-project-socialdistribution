@@ -10,6 +10,7 @@ import Select from '@material-ui/core/Select';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
+import Pagination from '../Pagination/Pagination';
 
 import Comment from './Comment';
 // import Link from '@material-ui/core/Link';
@@ -253,7 +254,6 @@ export default function Post(props) {
     }
 
     const sendCommentHandler = (e) => {
-        console.log(comment);
         props.createComment({
             type: 'comment',
             author: props.author,
@@ -359,6 +359,7 @@ export default function Post(props) {
                         </div>
                     </div>
                     { comments }
+                    <Pagination page={props.commentsPage} />
                 </div>
                 );
             setExpanded(true);
