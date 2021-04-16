@@ -147,7 +147,7 @@ function Feed(props) {
             }
         }
 
-        if (!_.isEmpty(props.inbox)) {
+        if (!_.isEmpty(props.inbox) && !_.isEmpty(props.publicPosts)) {
             if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
                 setLikesLoaded(true);
                 _.forEach(props.inbox.items.concat(props.publicPosts), d => {
