@@ -368,7 +368,7 @@ export default function Post(props) {
                     </div>
                 </div>
                 { comments }
-                <Pagination page={null} onClickHandler={(direction => {
+                <Pagination page={commentsPage} onClickHandler={(direction => {
                     if (direction === 'left' && commentsPage !== 1) {
                         setCommentsPage(commentsPage - 1);
                         props.commentPaginationHandler(direction, postData, commentsPage-1);
