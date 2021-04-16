@@ -21,6 +21,7 @@ import {
     postSharePost,
     postNewPrivatePost,
     getComments,
+    getCommentsRemote,
     destroyInbox,
     getPublicPosts
 }
@@ -178,7 +179,11 @@ function Feed(props) {
 
                     // get comments of each post
                     if (d.type === 'post') {
-                        props.getComments(d, props.token, 1, !d.id.includes(props.author.host));
+                        if (d.id.includes(props.author.host)) {
+                            props.getComments(d, props.token, 1);
+                        } else {
+                            props.getCommentsRemote(d, props.token);
+                        }
                     }
                 });
             }
@@ -274,6 +279,7 @@ export default connect(mapStateToProps,
         deleteFriend,
         getFollowing,
         getComments,
+        getCommentsRemote,
         destroyInbox,
         getPublicPosts
     })(Feed);
