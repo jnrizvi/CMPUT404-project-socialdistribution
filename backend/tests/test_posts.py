@@ -22,6 +22,12 @@ class TestPostViewSet(APITestCase):
             password='nonone'
         )
 
+        self.test_user3 = User.objects.create_user(
+            username='sansa',
+            password='stark'
+        )
+
+
         self.client = APIClient()
 
         self.author_test1 = Author.objects.create(
@@ -38,8 +44,31 @@ class TestPostViewSet(APITestCase):
             github="https://www.github.com/AryaStark"
         )
 
+        self.author_test3 = Author.objects.create(
+            user=self.test_user3,
+            displayName="Sansa Stark",
+            host="http://localhost:8000/",
+            github="https://www.github.com/sansaStark"
+        )
+
         self.author_test1.save()
         self.author_test2.save()
+        self.author_test3.save()
+
+
+        self.follow_1 = Follow.objects.create(
+            follower=self.author_test1,
+            followee=self.author_test3,
+            friends=True
+        )
+        self.follow_2 = Follow.objects.create(
+            follower=self.author_test3,
+            followee=self.author_test1,
+            friends=True
+        )
+
+        self.follow_1.save()
+        self.follow_2.save()
 
         # Make User 1 create a POST
         self.test_post1_author1 = Post.objects.create(
@@ -312,6 +341,78 @@ class TestPostViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_update_unauth_post_public(self):
+        """Testing for incorrectly updating a post made by an author
+        """
+        update_request = {
+            "description": "This is the coolest thing ever",
+            "contentType": "text/plain",
+            "content": "This is some text that goes in the post body to update",
+            "categories": [
+                "Test",
+                "post",
+                "author"
+            ],
+            "visibility": "PUBLIC",
+            "unlisted": False,
+            "author": {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test1.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Jon Snow",
+                "github": "https://www.github.com/jonSnow"
+            }
+        }
+
+        # forcing authentication of an author
+        self.client.force_authenticate(user=self.author_test2.user)
+
+        response = self.client.post(
+            reverse(
+                'post_object',
+                kwargs={'author_id': self.author_test1.id, 'id': self.test_post1_author1.id}),
+            update_request,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_unauth_post_friends(self):
+        """Testing for incorrectly updating a post made by an author
+        """
+        update_request = {
+            "description": "This is the coolest thing ever",
+            "contentType": "text/plain",
+            "content": "This is some text that goes in the post body to update",
+            "categories": [
+                "Test",
+                "post",
+                "author"
+            ],
+            "visibility": "FRIENDS",
+            "unlisted": False,
+            "author": {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test1.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Jon Snow",
+                "github": "https://www.github.com/jonSnow"
+            }
+        }
+
+        # forcing authentication of an author
+        self.client.force_authenticate(user=self.author_test2.user)
+
+        response = self.client.post(
+            reverse(
+                'post_object',
+                kwargs={'author_id': self.author_test1.id, 'id': self.test_post1_author1.id}),
+            update_request,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_delete_author_post(self):
         """Testing for deleting a post made by an author
         """
@@ -373,3 +474,58 @@ class TestPostViewSet(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+
+    def test_create_friends_post(self):
+
+        self.client.force_authenticate(user=self.author_test1.user)
+        put_request = {
+            "title": "National Treasure",
+            "id": "http://localhost:8000/author/{}/posts/".format(
+                self.author_test2.id
+            ),
+            "description": "Benny Franklin",
+            "source": "http://localhost:8000/",
+            "origin": "http://localhost:8000/",
+            "content": "Some plaintext for Washington",
+            "contentType": "text/plain",
+            "categories": [
+                "Test",
+                "post",
+                "author"
+            ],
+            "visibility": "FRIENDS",
+            "unlisted": False,
+            "author": {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test1.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Arya Stark",
+                "github": "https://www.github.com/aryastark"
+            }
+        }
+
+        response = self.client.post(
+            reverse('posts_object', kwargs={'author_id': self.author_test1.id}),
+            put_request,
+            format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        #response_2 = self.client.get(f'author/{self.author_test3.id}/inbox')
+
+        self.client.force_authenticate(user=self.author_test3.user)
+
+        response_2 = self.client.get(
+            reverse(
+                'inbox_object',
+                kwargs={
+                    'author_id': self.author_test3.id,
+                }
+            )
+        )
+
+        self.assertEqual(response_2.data['items'][0]['type'], "post")
+        self.assertEqual(response_2.data['items'][0]['title'], "National Treasure")

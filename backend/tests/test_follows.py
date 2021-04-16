@@ -33,6 +33,16 @@ class TestLikeAPI(APITestCase):
             password='3eyedcrow'
         )
 
+        self.test_user5 = User.objects.create_user(
+            username='ned',
+            password='3eyedcrow'
+        )
+
+        self.test_user6 = User.objects.create_user(
+            username='khal',
+            password='3eyedcrow'
+        )
+
         self.client = APIClient()
 
         self.author_test1 = Author.objects.create(
@@ -49,8 +59,25 @@ class TestLikeAPI(APITestCase):
             github="https://www.github.com/AryaStark"
         )
 
+        self.author_test5 = Author.objects.create(
+            user=self.test_user2,
+            displayName='Ned',
+            host="http://localhost:8000/",
+            github="https://www.github.com/Ned"
+        )
+
+        self.author_test6 = Author.objects.create(
+            user=self.test_user2,
+            displayName='Khal',
+            host="http://localhost:8000/",
+            github="https://www.github.com/Khal"
+        )
+
+
         self.author_test1.save()
         self.author_test2.save()
+        self.author_test5.save()
+        self.author_test6.save()
 
         self.author_test3 = Author.objects.create(
             user=self.test_user3,
@@ -89,6 +116,13 @@ class TestLikeAPI(APITestCase):
             friends=True
         )
         self.author3_friend_author4.save()
+
+        self.author4_friend_author3 = Follow.objects.create(
+            follower=self.author_test4,
+            followee=self.author_test3,
+            friends=True
+        )
+        self.author4_friend_author3.save()
 
     def test_follow_reciprocal(self):
         """Testing for friending an author who follows them and
@@ -165,8 +199,8 @@ class TestLikeAPI(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['type'], 'Follow')
-        self.assertTrue(response.data['actor']['id'].split(
+        self.assertEqual(response.data['type'], 'Follow')
+        self.assertEqual(response.data['actor']['id'].split(
             "/")[-1], self.author_test1.id)
         self.assertEqual(response.data['object']['id'].split(
             "/")[-1], self.author_test2.id)
@@ -188,7 +222,7 @@ class TestLikeAPI(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['items'][0]['id'].split(
+        self.assertEqual(response.data['items'][0]['id'].split(
             "/")[-1], self.author_test1.id)
         self.assertEqual(response.data['items'][1]['id'].split(
             "/")[-1], self.author_test3.id)
@@ -212,4 +246,122 @@ class TestLikeAPI(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['type'], 'Follow')
+        self.assertEqual(response.data['type'], 'Follow')
+
+    def test_get_friends(self):
+
+        self.client.force_authenticate(user=self.author_test3.user)
+
+        response = self.client.get(
+            reverse(
+                'friends_api',
+                kwargs={
+                    'author_id': self.author_test3.id
+                }
+            )
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['type'], 'friends')
+        self.assertEqual(response.data['items'][0]['displayName'], 'Bran Stark')
+
+
+    def test_befriend(self):
+
+        self.client.force_authenticate(user=self.author_test5.user)
+
+        response = self.client.get(
+            reverse(
+                'friends_api',
+                kwargs={
+                    'author_id': self.author_test5.id
+                }
+            )
+        )
+        self.assertEqual(response.data['items'], [])
+
+        follow_request = {
+            'type': "Follow",
+            'object': {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test6.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Khal",
+                "github": "https://www.github.com/Khal"
+            },
+            'actor': {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test5.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Ned",
+                "github": "https://www.github.com/Ned"
+            }
+        }
+
+        response = self.client.put(
+            reverse(
+                'update_followers',
+                kwargs={
+                    'author_id': self.author_test6.id,
+                    'foreign_id': self.author_test5.id
+                }
+            ),
+            follow_request,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.get(
+            reverse(
+                'friends_api',
+                kwargs={
+                    'author_id': self.author_test5.id
+                }
+            )
+        )
+        self.assertEqual(response.data['items'], [])
+
+        follow_request2 = {
+            'type': "Follow",
+            'object': {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test5.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Ned",
+                "github": "https://www.github.com/Ned"
+            },
+            'actor': {
+                "type": "author",
+                "id": "http://localhost:8000/author/{}".format(self.author_test6.id),
+                "host": "http://localhost:8000/",
+                "displayName": "Khal",
+                "github": "https://www.github.com/Khal"
+            }
+        }
+
+        response = self.client.put(
+            reverse(
+                'update_followers',
+                kwargs={
+                    'author_id': self.author_test5.id,
+                    'foreign_id': self.author_test6.id
+                }
+            ),
+            follow_request2,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.get(
+            reverse(
+                'friends_api',
+                kwargs={
+                    'author_id': self.author_test5.id
+                }
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['type'], 'friends')
+        self.assertEqual(response.data['items'][0]['displayName'], 'Khal')

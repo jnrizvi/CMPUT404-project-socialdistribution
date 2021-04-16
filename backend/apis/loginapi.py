@@ -1,14 +1,13 @@
+# Local Imports
 from ..models import Author
 from ..serializers import AuthorSerializer
-
-
+# Django Imports
 from django.contrib.auth import authenticate, login
-
+# Rest Framework Imports
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions
-
+# Other Imports
 import json
-
 
 class LoginAPI(viewsets.ModelViewSet):
     """
@@ -36,10 +35,12 @@ class LoginAPI(viewsets.ModelViewSet):
             request, username=body['username'], password=body['password'])
         # If a user is returned perform a validated login session, return the author object for the user
         if user is not None:
+            # Process a user login
             try:
                 login(request, user)
             except:
                 return Response(data="Login error, user not logged in!", status=status.HTTP_403_FORBIDDEN)
+            # Retrieve the author object for the user login
             try:
                 return Response(self.get_serializer(Author.objects.filter(user=user).get()).data, status=status.HTTP_200_OK)
             except Exception as e:
