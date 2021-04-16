@@ -12,3 +12,4 @@ from .registerapi import RegisterAPI
 from .remotecommentviewset import RemoteCommentViewSet
 from .followingapi import FollowingAPI
 from .friendapi import FriendAPI
+from .postsapi import PostsViewSet
