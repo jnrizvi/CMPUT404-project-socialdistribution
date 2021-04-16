@@ -33,33 +33,35 @@ class RemoteCommentViewSet(viewsets.ModelViewSet):
 
 		# Read in request body
 		body = json.loads(request.body.decode('utf-8'))
+
 		remote_comments_link = body.get("comments", None)
+
+		if remote_comments_link is None:
+			return Response(data="The comment link of the remote post is not present!", status=status.HTTP_HTTP_400_BAD_REQUEST)
 
 
 		if request.user.is_authenticated:
 			try:
-				if remote_comments_link:
-					# Get the information for the node that we need to get the list of comments from
-					comment_host = remote_comments_link.split('/')[2]
-					node = Node.objects.filter(host__icontains=comment_host).get()
-					s = requests.Session()
-					s.auth = (node.remote_username, node.remote_password)
-					s.headers.update({'Content-Type':'application/json'})
-					params = {}
+				# Get the information for the node that we need to get the list of comments from
+				comment_host = remote_comments_link.split('/')[2]
+				node = Node.objects.filter(host__icontains=comment_host).get()
+				s = requests.Session()
+				s.auth = (node.remote_username, node.remote_password)
+				s.headers.update({'Content-Type':'application/json'})
+				params = {}
 
-					# Check if the request is asking for pagination and pass those query params along to the remote server
-					if request.query_params.get('page', False) or request.query_params.get('size', False):
-						if request.query_params.get('page', False):
-							params.update({'page': request.query_params.get('page')})
-						if request.query_params.get('size', False):
-							params.update({'size': request.query_params.get('size')})
-						# Send the request to the node with the pagination details
-						response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", params=params, json=body)
-					else:
-						# Send the request to the node without any pagination
-						response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", json=body)
+				# Check if the request is asking for pagination and pass those query params along to the remote server
+				if request.query_params.get('page', False) or request.query_params.get('size', False):
+					if request.query_params.get('page', False):
+						params.update({'page': request.query_params.get('page')})
+					if request.query_params.get('size', False):
+						params.update({'size': request.query_params.get('size')})
+					# Send the request to the node with the pagination details
+					response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", params=params, json=body)
 				else:
-					raise Exception("The comment link of the remote post is not present!")
+					# Send the request to the node without any pagination
+					response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", json=body)
+
 			except Exception:
 				return Response(data="Unable to get the comments from the remote server!", status=status.HTTP_400_BAD_REQUEST)
 			else:
