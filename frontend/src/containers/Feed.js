@@ -150,7 +150,7 @@ function Feed(props) {
         if (!_.isEmpty(props.inbox)) {
             if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
                 setLikesLoaded(true);
-                _.forEach(props.inbox.items, d => {
+                _.forEach(props.inbox.items.concat(props.publicPosts), d => {
                     if (d.type === 'post' && d.visibility === 'FRIENDS') {
                         const post = d.id.split('/');
                         post[5] = 'post';
