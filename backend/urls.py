@@ -9,29 +9,31 @@ router.register('author', AuthorViewSet, 'authors')
 urlpatterns = [
     # Register
     path('api/auth/register',
-         RegisterAPI.as_view(), name='author_register'),
+        RegisterAPI.as_view(), name='author_register'),
 
     # Login
     path('api/auth/login',
-         LoginAPI.as_view({'post': 'update'}), name='author_login'),
+        LoginAPI.as_view({'post': 'update'}), name='author_login'),
 
     # Author
     path('author/<str:id>/',
-         AuthorViewSet.as_view({'post': 'update', 'get': 'retrieve'}), name='author_object'),
+        AuthorViewSet.as_view({'post': 'update', 'get': 'retrieve'}), name='author_object'),
     path('authors',
-         AuthorViewSet.as_view({'get': 'list'}), name='author_list'),
+        AuthorViewSet.as_view({'get': 'list'}), name='author_list'),
 
     # Posts
+    path('author/posts',
+        PostsViewSet.as_view({'get':'list'}), name='list_posts'),
     path('author/<str:author_id>/posts/',
-         PostViewSet.as_view({'get': 'list', 'post': 'create'}), name='posts_object'),
+        PostViewSet.as_view({'get': 'list', 'post': 'create'}), name='posts_object'),
     path('author/<str:author_id>/posts/<str:id>',
-         PostViewSet.as_view({'get': 'retrieve', 'post': 'update', 'delete': 'destroy', 'put': 'create'}), name='post_object'),
+        PostViewSet.as_view({'get': 'retrieve', 'post': 'update', 'delete': 'destroy', 'put': 'create'}), name='post_object'),
 
     # Comments
     path('author/<str:author_id>/posts/<str:post_id>/comments/remote',
-         RemoteCommentViewSet.as_view({'post': 'list'}), name='remote_comments_object'),
+        RemoteCommentViewSet.as_view({'post': 'list'}), name='remote_comments_object'),
     path('author/<str:author_id>/posts/<str:post_id>/comments',
-         CommentViewSet.as_view({'get': 'list', 'post': 'create'}), name='comments_object'),
+        CommentViewSet.as_view({'get': 'list', 'post': 'create'}), name='comments_object'),
 
     # Likes
     path('author/<str:author_id>/post/<str:post_id>/likes',
