@@ -45,28 +45,12 @@ class InboxAPI(viewsets.ModelViewSet):
 				# Set the pagination class for the results of this method
 				self.pagination_class = ResultsPagination
 
-				# Find follows, posts, likes, and comments from the inbox table that belong to this author
-				#follows_list = Inbox.objects.filter(author=author_id, follow__isnull=False)
-				#posts_list = Inbox.objects.filter(author=author_id, post__isnull=False)
-				#likes_list = Inbox.objects.filter(author=author_id, like__isnull=False)
-				#comments_list = Inbox.objects.filter(author=author_id, icomment__isnull=False)
-
-				# Find the full follow, post, like, and comment objects in their respective tables
-				#follows = Follow.objects.filter(follow__in=follows_list)
-				#posts = Post.objects.filter(post__in=posts_list)
-				#likes = Like.objects.filter(like__in=likes_list)
-				#comments = Comment.objects.filter(comment__in=comments_list)
-
-				# Serialize the returned rows from each table
-				#post_serializer = PostSerializer(posts, many=True, remove_fields={'size'})
-				#follow_serializer = FollowSerializer(follows, many=True)
-				#like_serializer = LikeSerializer(likes, many=True, context={'request': request})
-				#comment_serializer = CommentSerializer(comments, many=True)
-
+				# Find all of the inbo items for this author ordered by the time they were added to the inbox
 				inbox_items = Inbox.objects.filter(author=author_id).order_by('-published')
 
 				serialized_data = []
 
+				# Iterate through the inbox items and serialize them depending on the type of item it is
 				for item in inbox_items.iterator():
 					if item.follow is not None:
 						serialized_data.append(FollowSerializer(item.follow).data)
