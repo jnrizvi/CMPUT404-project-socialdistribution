@@ -1,4 +1,5 @@
 
+from manager.paginate import ResultsPagination
 from manager.settings import HOSTNAME
 from ..models import Post
 from ..serializers import PostSerializer
@@ -23,13 +24,20 @@ class PostsViewSet(viewsets.ModelViewSet):
 	# Specifies the lookup field to use the in the database
 	lookup_field = 'id'
 
+	pagination_class = ResultsPagination
+
 	def list (self, request, *args, **kwargs):
 		"""
 		This method will be called when a GET request is received, listing all the posts in the database.
 		"""
+		self.pagination_class = ResultsPagination
 		try:
-			posts = Post.objects.filter(visibility="PUBLIC", host__icontains=HOSTNAME)
+			posts = Post.objects.filter(visibility="PUBLIC", author_host__icontains=HOSTNAME)
 		except:
 			return Response(data="No posts found", status=status.HTTP_404_NOT_FOUND)
+		
+		# Paginate the returned list of all public posts
+		result = self.get_serializer(posts, many=True)
+		paginated_serialized_result = self.paginate_queryset(result.data)
 
-		return Response(self.get_serializer(posts, many=True).data, status=status.HTTP_200_OK)
+		return Response(paginated_serialized_result, status=status.HTTP_200_OK)
