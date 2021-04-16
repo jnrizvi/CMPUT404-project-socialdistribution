@@ -191,7 +191,7 @@ export default function Post(props) {
     var ReactRenderer = require('commonmark-react-renderer');
 
     var parser = new CommonMark.Parser();
-    var renderer = new ReactRenderer();    
+    var renderer = new ReactRenderer();
         
     const { postData } = props;
 
@@ -204,6 +204,7 @@ export default function Post(props) {
     const [tags, setTags] = useState(postData.categories);
 
     let comment = '';
+    let commentsPage = 1;
 
     const clearTextFields = () => {
         setType('default');
@@ -359,7 +360,14 @@ export default function Post(props) {
                         </div>
                     </div>
                     { comments }
-                    <Pagination page={props.commentsPage} />
+                    <Pagination page={null} onClickHandler={(direction => {
+                        if (direction === 'left' && commentsPage !== 1) {
+                            commentsPage -= 1;
+                        } else if (direction === 'right') {
+                            commentsPage += 1;
+                        }
+                        props.commentPaginationHandler(direction, postData, commentsPage);
+                    })} />
                 </div>
                 );
             setExpanded(true);

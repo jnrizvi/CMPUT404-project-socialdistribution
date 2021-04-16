@@ -78,6 +78,10 @@ function Feed(props) {
         }
     }
 
+    const commentPaginationHandler = (direction, post, page) => {
+        props.getComments(post, props.token, page, !post.id.includes(props.author.host));
+    }
+
     const createNewPost = (post, privatePerson) => {
         const description = 'this is a post';
         const finalPost = {
@@ -192,6 +196,7 @@ function Feed(props) {
                             deleteInbox={deleteInbox}
                             inboxPage={inboxPage}
                             inboxPaginationHandler={inboxPaginationHandler}
+                            commentPaginationHandler={commentPaginationHandler}
                         />
                     </div>
                     <div className='col-3 ps-5'>

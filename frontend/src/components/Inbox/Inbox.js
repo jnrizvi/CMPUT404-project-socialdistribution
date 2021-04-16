@@ -38,7 +38,7 @@ export default function Inbox(props) {
                             editMode={false}
                             likes={props.likes[conversion.join('/')]}
                             comments={props.comments[d.id]}
-                            commentsPage={1}
+                            commentPaginationHandler={props.commentPaginationHandler}
                         />;
             } else if (d.type === 'like') {
                 return <Like key={i} data={d}/>;
