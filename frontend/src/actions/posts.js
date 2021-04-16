@@ -15,7 +15,8 @@ import {
     POST_PRIVATE_POST,
     POST_COMMENT_LIKE,
     GET_COMMENTS,
-    DESTROY_INBOX
+    DESTROY_INBOX,
+    GET_PUBLIC_POSTS
 } from './types';
 import _ from 'lodash';
 import { returnErrors } from './messages';
@@ -117,6 +118,29 @@ export const getInbox = (authorId, token) => dispatch => {
         const errors = {
             msg: err.response.data,
             origin: GET_INBOX,
+            status: err.response.status
+        }
+        dispatch({
+            type: GET_ERRORS,
+            payload: errors
+        })
+    });
+}
+
+export const getPublicPosts = (token) => dispatch => {
+    axios.get(`/author/posts`, {
+        headers: {
+            'Authorization': `Basic ${token}`
+        }
+    }).then(res => {
+        dispatch({
+            type: GET_PUBLIC_POSTS,
+            payload: res.data
+        });
+    }).catch(err => {
+        const errors = {
+            msg: err.response.data,
+            origin: GET_PUBLIC_POSTS,
             status: err.response.status
         }
         dispatch({

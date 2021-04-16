@@ -12,7 +12,19 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments, destroyInbox } from "../actions/posts";
+import {
+    postNewPost,
+    getInbox,
+    postLike,
+    postComment,
+    getLikes,
+    postSharePost,
+    postNewPrivatePost,
+    getComments,
+    destroyInbox,
+    getPublicPosts
+}
+from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -57,6 +69,7 @@ function Feed(props) {
     const initialLoad = () => {
         if (!loaded) {
             props.getInbox(props.author_id, props.token);
+            props.getPublicPosts(props.token);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -169,7 +182,8 @@ function Feed(props) {
                         <PostSorter />
                         <GithubStream activities={props.github_activity}/>
                         <Inbox
-                            data={props.inbox}
+                            inbox={props.inbox}
+                            publicPosts={props.publicPosts}
                             author={props.author}
                             postFriendRequest={postFriendRequest}
                             postLiked={postLiked}
@@ -221,7 +235,8 @@ const mapStateToProps = (state) => ({
     token: state.users.basic_token,
     following: state.users.following,
     likes: state.posts.likes,
-    comments: state.posts.comments
+    comments: state.posts.comments,
+    publicPosts: state.posts.publicPosts
 });
   
 export default connect(mapStateToProps,
@@ -241,5 +256,6 @@ export default connect(mapStateToProps,
         deleteFriend,
         getFollowing,
         getComments,
-        destroyInbox
+        destroyInbox,
+        getPublicPosts
     })(Feed);

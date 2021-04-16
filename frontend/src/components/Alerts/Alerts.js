@@ -24,7 +24,8 @@ import {
     GET_FOLLOWING,
     POST_COMMENT_LIKE,
     GET_COMMENTS,
-    DESTROY_INBOX
+    DESTROY_INBOX,
+    GET_PUBLIC_POSTS
 } from '../../actions/types';
 
 import { withAlert } from 'react-alert';
@@ -84,6 +85,8 @@ export class Alerts extends Component {
                         return alert.error(`${error.status} Error: Cannot Update Profile`);      
                     case DESTROY_INBOX:
                         return alert.error(`${error.status} Error: Cannot Destroy Inbox`);          
+                    case GET_PUBLIC_POSTS:
+                        return alert.error(`${error.status} Error: Cannot Get Public Posts`);              
                     default:
                         return alert.error(`${error.status} Error`);
                 }
