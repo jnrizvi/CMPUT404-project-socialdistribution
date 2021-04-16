@@ -15,7 +15,8 @@ import {
     POST_PRIVATE_POST,
     POST_COMMENT_LIKE,
     GET_COMMENTS,
-    DESTROY_INBOX
+    DESTROY_INBOX,
+    GET_PUBLIC_POSTS
 } from './types';
 import _ from 'lodash';
 import { returnErrors } from './messages';
@@ -103,8 +104,8 @@ export const postNewPrivatePost = (post, recipient, token) => dispatch => {
 }
 
 // Get all posts for activity feed
-export const getInbox = (authorId, token) => dispatch => {
-    axios.get(`/author/${authorId}/inbox`, {
+export const getInbox = (authorId, token, page) => dispatch => {
+    axios.get(`/author/${authorId}/inbox?page=${page}`, {
         headers: {
             'Authorization': `Basic ${token}`
         }
@@ -117,6 +118,29 @@ export const getInbox = (authorId, token) => dispatch => {
         const errors = {
             msg: err.response.data,
             origin: GET_INBOX,
+            status: err.response.status
+        }
+        dispatch({
+            type: GET_ERRORS,
+            payload: errors
+        })
+    });
+}
+
+export const getPublicPosts = (token) => dispatch => {
+    axios.get(`/author/posts`, {
+        headers: {
+            'Authorization': `Basic ${token}`
+        }
+    }).then(res => {
+        dispatch({
+            type: GET_PUBLIC_POSTS,
+            payload: res.data
+        });
+    }).catch(err => {
+        const errors = {
+            msg: err.response.data,
+            origin: GET_PUBLIC_POSTS,
             status: err.response.status
         }
         dispatch({
@@ -344,9 +368,37 @@ export const putUpdatePost = (post, token) => dispatch => {
     });
 }
 
-export const getComments = (item, token) => dispatch => {
+export const getComments = (item, token, page) => dispatch => {
     const items = item.id.split('/');
-    axios.get(`/author/${items[items.length-3]}/posts/${items[items.length-1]}/comments`, {
+    axios.get(`/author/${items[items.length-3]}/posts/${items[items.length-1]}/comments?page=${page}&size=10`, {
+        headers: {
+            'Authorization': `Basic ${token}`
+        }
+    }).then(res => {
+        const payload = {
+            itemData: res.data,
+            itemId: item.id
+        };
+        dispatch({
+            type: GET_COMMENTS,
+            payload
+        });
+    }).catch(err => {
+        const errors = {
+            msg: err.response.data,
+            origin: GET_COMMENTS,
+            status: err.response.status
+        }
+        dispatch({
+            type: GET_ERRORS,
+            payload: errors
+        })
+    });
+}
+
+export const getCommentsRemote = (item, token) => dispatch => {
+    const items = item.id.split('/');
+    axios.post(`/author/${items[items.length-3]}/posts/${items[items.length-1]}/comments/remote`, {}, {
         headers: {
             'Authorization': `Basic ${token}`
         }
