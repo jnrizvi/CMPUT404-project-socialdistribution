@@ -182,7 +182,7 @@ function Feed(props) {
                         if (d.id.includes(props.author.host)) {
                             props.getComments(d, props.token, 1);
                         } else {
-                            props.getCommentsRemote(d, props.token);
+                            props.getCommentsRemote(d, props.token, d.comments);
                         }
                     }
                 });
