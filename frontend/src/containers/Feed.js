@@ -53,10 +53,11 @@ function Feed(props) {
     
     const [loaded, setLoaded] = useState(false);
     const [likesLoaded, setLikesLoaded] = useState(false);
+    const [inboxPage, setInboxPage] = useState(1);
 
     const initialLoad = () => {
         if (!loaded) {
-            props.getInbox(props.author_id, props.token);
+            props.getInbox(props.author_id, props.token, inboxPage);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -64,6 +65,16 @@ function Feed(props) {
             props.getGithub(github[github.length - 1]);
             props.postSearchDisplayName(props.token);
             setLoaded(true);
+        }
+    }
+
+    const inboxPaginationHandler = (direction) => {
+        if (direction === 'left' && inboxPage !== 1) {
+            setInboxPage(inboxPage - 1);
+            props.getInbox(props.author_id, props.token, inboxPage-1);
+        } else if (direction === 'right') {
+            setInboxPage(inboxPage + 1);
+            props.getInbox(props.author_id, props.token, inboxPage+1);
         }
     }
 
@@ -179,6 +190,8 @@ function Feed(props) {
                             likes={props.likes}
                             comments={props.comments}
                             deleteInbox={deleteInbox}
+                            inboxPage={inboxPage}
+                            inboxPaginationHandler={inboxPaginationHandler}
                         />
                     </div>
                     <div className='col-3 ps-5'>
