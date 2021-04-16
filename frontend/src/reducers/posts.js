@@ -9,7 +9,8 @@ import {
     POST_SHARE_POST,
     GET_PERSONAL_POSTS,
     GET_LIKES,
-    GET_COMMENTS
+    GET_COMMENTS,
+    GET_PUBLIC_POSTS
 } from '../actions/types.js';
 import _, { initial } from 'lodash';
 
@@ -22,7 +23,8 @@ const initialState = {
     share_post: {},
     personal_posts: [],
     likes: {},
-    comments: {}
+    comments: {},
+    publicPosts: {}
 }
 
 export default function(state = initialState, action) {
@@ -76,6 +78,11 @@ export default function(state = initialState, action) {
                         [itemId]: itemData
                     }
                 }
+            }
+        case GET_PUBLIC_POSTS:
+            return {
+                ...state,
+                publicPosts: action.payload
             }
         case GET_COMMENTS:
             if (action.payload) {

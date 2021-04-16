@@ -12,7 +12,19 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import Followers from '../components/Followers/Followers';
 import GithubStream from '../components/GithubStream/GithubStream';
 
-import { postNewPost, getInbox, postLike, postComment, getLikes, postSharePost, postNewPrivatePost, getComments } from "../actions/posts";
+import {
+    postNewPost,
+    getInbox,
+    postLike,
+    postComment,
+    getLikes,
+    postSharePost,
+    postNewPrivatePost,
+    getComments,
+    destroyInbox,
+    getPublicPosts
+}
+from "../actions/posts";
 import {
     postSearchDisplayName,
     postFriendRequest,
@@ -34,7 +46,7 @@ const useStyles = makeStyles(() => ({
     container: {
         padding: '0px 10%'
     }
-  }));
+}));
 
 // pretend this is my author id to tell between my posts and others' posts
 // const stuffFromAuthContext = {
@@ -53,10 +65,12 @@ function Feed(props) {
     
     const [loaded, setLoaded] = useState(false);
     const [likesLoaded, setLikesLoaded] = useState(false);
+    const [inboxPage, setInboxPage] = useState(1);
 
     const initialLoad = () => {
         if (!loaded) {
-            props.getInbox(props.author_id, props.token);
+            props.getInbox(props.author_id, props.token, inboxPage);
+            props.getPublicPosts(props.token);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -67,8 +81,22 @@ function Feed(props) {
         }
     }
 
+    const inboxPaginationHandler = (direction) => {
+        if (direction === 'left' && inboxPage !== 1) {
+            setInboxPage(inboxPage - 1);
+            props.getInbox(props.author_id, props.token, inboxPage-1);
+        } else if (direction === 'right') {
+            setInboxPage(inboxPage + 1);
+            props.getInbox(props.author_id, props.token, inboxPage+1);
+        }
+    }
+
+    const commentPaginationHandler = (direction, post, page) => {
+        props.getComments(post, props.token, page, !post.id.includes(props.author.host));
+    }
+
     const createNewPost = (post, privatePerson) => {
-        const description = 'this is a text post';
+        const description = 'this is a post';
         const finalPost = {
             ...post,
             author: props.author,
@@ -106,7 +134,7 @@ function Feed(props) {
     }
 
     const createComment = (body, post) => {
-        props.postComment(body, post, props.token, !body.comments.includes(props.author.host));
+        props.postComment(body, post, props.token);
     }
 
     const sharePost = (post) => {
@@ -115,6 +143,10 @@ function Feed(props) {
 
     const unfriend = (friend) => {
         props.deleteFriend(props.author, friend, props.token);
+    }
+
+    const deleteInbox = () => {
+        props.destroyInbox(props.author_id, props.token);
     }
 
     React.useEffect(() => {
@@ -130,10 +162,10 @@ function Feed(props) {
             }
         }
 
-        if (!_.isEmpty(props.inbox)) {
+        if (!_.isEmpty(props.inbox) && !_.isEmpty(props.publicPosts)) {
             if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
                 setLikesLoaded(true);
-                _.forEach(props.inbox.items, d => {
+                _.forEach(props.inbox.items.concat(props.publicPosts), d => {
                     if (d.type === 'post' && d.visibility === 'FRIENDS') {
                         const post = d.id.split('/');
                         post[5] = 'post';
@@ -146,7 +178,7 @@ function Feed(props) {
 
                     // get comments of each post
                     if (d.type === 'post') {
-                        props.getComments(d, props.token);
+                        props.getComments(d, props.token, 1, !d.id.includes(props.author.host));
                     }
                 });
             }
@@ -165,7 +197,8 @@ function Feed(props) {
                         <PostSorter />
                         <GithubStream activities={props.github_activity}/>
                         <Inbox
-                            data={props.inbox}
+                            inbox={props.inbox}
+                            publicPosts={props.publicPosts}
                             author={props.author}
                             postFriendRequest={postFriendRequest}
                             postLiked={postLiked}
@@ -174,6 +207,10 @@ function Feed(props) {
                             sharePost={sharePost}
                             likes={props.likes}
                             comments={props.comments}
+                            deleteInbox={deleteInbox}
+                            inboxPage={inboxPage}
+                            inboxPaginationHandler={inboxPaginationHandler}
+                            commentPaginationHandler={commentPaginationHandler}
                         />
                     </div>
                     <div className='col-3 ps-5'>
@@ -216,7 +253,8 @@ const mapStateToProps = (state) => ({
     token: state.users.basic_token,
     following: state.users.following,
     likes: state.posts.likes,
-    comments: state.posts.comments
+    comments: state.posts.comments,
+    publicPosts: state.posts.publicPosts
 });
   
 export default connect(mapStateToProps,
@@ -235,5 +273,7 @@ export default connect(mapStateToProps,
         postNewPrivatePost,
         deleteFriend,
         getFollowing,
-        getComments
+        getComments,
+        destroyInbox,
+        getPublicPosts
     })(Feed);

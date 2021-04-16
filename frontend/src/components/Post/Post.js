@@ -10,6 +10,7 @@ import Select from '@material-ui/core/Select';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
+import Pagination from '../Pagination/Pagination';
 
 import Comment from './Comment';
 // import Link from '@material-ui/core/Link';
@@ -189,8 +190,11 @@ export default function Post(props) {
     var CommonMark = require('commonmark');
     var ReactRenderer = require('commonmark-react-renderer');
 
+    const [, updateState] = useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
+
     var parser = new CommonMark.Parser();
-    var renderer = new ReactRenderer();    
+    var renderer = new ReactRenderer();
         
     const { postData } = props;
 
@@ -201,6 +205,7 @@ export default function Post(props) {
     const [type, setType] = useState(postData.contentType);
     const [content, setContent] = useState(postData.content);
     const [tags, setTags] = useState(postData.categories);
+    const [commentsPage, setCommentsPage] = useState(1);
 
     let comment = '';
 
@@ -210,6 +215,12 @@ export default function Post(props) {
         setContent('');
         setTags([]);
     }
+
+    React.useEffect(() => {
+        if (expanded) {
+            updateComments();
+        }
+    }, [props.comments]);
 
     const normal_content = () => {
         if (type === 'text/plain') {
@@ -231,7 +242,7 @@ export default function Post(props) {
 
     const onTextChange = (e) => {
         switch (e.target.id) {
-            case postData.id:
+            case 'commentText':
                 comment = e.target.value;
                 break;
             case 'editTitle':
@@ -323,49 +334,61 @@ export default function Post(props) {
         return block;
     }
 
+    const updateComments = () => {
+        const comments = (postData.visibility !== 'FRIENDS') && (props.comments.length !== 0)
+            ?   <div>
+                    <div className={classes.commentsTitle}>
+                        Comments:
+                    </div>
+                    <div>
+                        { props.comments.map( (d) => <Comment key={d.id} comment={d} likeClicked={props.commentLiked}/>) }
+                    </div>
+                </div>
+            : null;
+
+        setExpandedContent(
+            <div className={classes.commentWrapper}>
+                <div className={classes.flexContainer}>
+                    <InputBase
+                        className={classes.textField}
+                        onChange={onTextChange}
+                        placeholder='Add a comment'
+                        fullWidth
+                        id='commentText'
+                    />
+                    <div
+                        className={classes.sendButton}
+                        onClick={sendCommentHandler}
+                    >
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="32" height="32" rx="4" fill="#D1305E"/>
+                            <path d="M21.6667 10.3333L14.3333 17.6666" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M21.6667 10.3333L17 23.6666L14.3333 17.6666L8.33333 14.9999L21.6667 10.3333Z" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                { comments }
+                <Pagination page={commentsPage} onClickHandler={(direction => {
+                    if (direction === 'left' && commentsPage !== 1) {
+                        setCommentsPage(commentsPage - 1);
+                        props.commentPaginationHandler(direction, postData, commentsPage-1);
+                    } else if (direction === 'right') {
+                        setCommentsPage(commentsPage + 1);
+                        props.commentPaginationHandler(direction, postData, commentsPage+1);
+                    }
+                })} />
+            </div>
+        );
+    }
+
     const onCommentClicked = (e) => {
         if (!expanded) {
-            const comments = (postData.visibility !== 'FRIENDS') && (props.comments.length !== 0)
-                ?   <div>
-                        <div className={classes.commentsTitle}>
-                            Comments:
-                        </div>
-                        <div>
-                            { props.comments.map( (d) => <Comment key={d.id} comment={d} likeClicked={props.commentLiked}/>) }
-                        </div>
-                    </div>
-                : null;
-
-            setExpandedContent(
-                <div className={classes.commentWrapper}>
-                    <div className={classes.flexContainer}>
-                        <InputBase
-                            className={classes.textField}
-                            onChange={onTextChange}
-                            placeholder='Add a comment'
-                            fullWidth
-                            id={postData.id}
-                        />
-                        <div
-                            className={classes.sendButton}
-                            onClick={sendCommentHandler}
-                        >
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="32" height="32" rx="4" fill="#D1305E"/>
-                                <path d="M21.6667 10.3333L14.3333 17.6666" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M21.6667 10.3333L17 23.6666L14.3333 17.6666L8.33333 14.9999L21.6667 10.3333Z" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                    { comments }
-                </div>
-                );
+            updateComments();
             setExpanded(true);
         } else {
             setExpandedContent(null);
             setExpanded(false);
         }
-
     }
 
     const dropdownOnClickHandler = (event) => {
