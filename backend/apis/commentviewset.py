@@ -47,6 +47,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 			remote_comments_link = body.get("comments", None)
 
+			# If the author is not a local author, try to find the post that the comment needs to be made on and ensure that the origin of the post contains our HOSTNAME
 			if not comment_author_isLocal:
 				try:
 					post = Post.objects.filter(id=post_id).get()
@@ -57,10 +58,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 				except Exception as e:
 					return Response(data=str(e), status=status.HTTP_404_NOT_FOUND)
 
-			elif comment_author_isLocal: # Here we check if the post exists in our databse already, if it doesn't then we need to send a request for the post. Once we get the post we can create the comment on our server and the remote server
+			elif comment_author_isLocal: # Here we check if the post exists in our database already, if it doesn't then we need to send a request for the post. Once we get the post we can create the comment on our server and the remote server
 				# Check if the post exists in the database
 				try:
-					post = Post.objects.filter(id=post_id).get() #TODO: Double check if the post is remote spent
+					post = Post.objects.filter(id=post_id).get() 
 					if not HOSTNAME in post.origin:
 						raise Exception
 				# Post is not a local post so send the request through to the other server
@@ -68,6 +69,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 					try:
 						if remote_comments_link:
 							comment_host = remote_comments_link.split('/')[2]
+							
+							# Ensure that the additional "comments" field exists, and then send the request based on the information 
 							if not HOSTNAME in comment_host:
 								node = Node.objects.filter(host__icontains=comment_host).get()
 								s = requests.Session()
