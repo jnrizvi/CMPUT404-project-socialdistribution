@@ -31,6 +31,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 		This method will be called when a GET request is received, listing all the authors in the database.
 		"""
 
+		# Check to see if the request is coming from another node and then return just data of our own authors
 		try:
 			remoteCheck = request.user.node
 			authors = Author.objects.filter(host=HOSTNAME)
@@ -46,6 +47,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 			local_authors = Author.objects.filter(host=HOSTNAME)
 			data = []
 			data += self.get_serializer(local_authors, many=True).data
+			# For each node in our DB, send a request to it to get all the authors and then append it to the data to return it
 			for node in nodes.iterator():
 				if not HOSTNAME in node.host:
 					s = requests.Session()

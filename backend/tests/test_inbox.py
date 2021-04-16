@@ -85,12 +85,17 @@ class TestLikeAPI(APITestCase):
         )
         self.author3_follow_author1.save()
 
-        self.author1_inbox = Inbox.objects.create(
+        self.author1_inbox1 = Inbox.objects.create(
             author=self.author_test1,
             like=self.test_like1_post1,
+        )
+        self.author1_inbox1.save()
+
+        self.author1_inbox2 = Inbox.objects.create(
+            author=self.author_test1,
             follow=self.author3_follow_author1
         )
-        self.author1_inbox.save()
+        self.author1_inbox2.save()
 
     def test_add_follow_request_to_inbox(self):
         """Testing for adding a follow request to the inbox of the followee author
@@ -129,6 +134,38 @@ class TestLikeAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_add_like_to_inbox(self):
+        """Testing for adding a follow request to the inbox of the followee author
+        """
+        # forcing authentication of an authors
+        self.client.force_authenticate(user=self.author_test1.user)
+        #self.client.force_authenticate(user=self.author_test2.user)
+
+        like_request = {
+            "type": "like",
+            "author": {
+                "type": "author",
+                "id": f"https://localhost:8000/author/{self.author_test3.id}",
+                "host": "https://localhost:8000/",
+                "displayName": "Sansa Stark",
+                "url": f"https://localhost:8000/author/{self.author_test3.id}",
+                "github": "https://www.github.com/queenofthenorth"
+            },
+            "object": f"https://localhost:8000/author/{self.author_test1.id}/posts/"+self.test_post1_author1.id
+        }
+
+        response = self.client.post(
+            reverse(
+                'inbox_object',
+                kwargs={
+                    'author_id': self.author_test1.id
+                }
+            ),
+            like_request,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_get_inbox(self):
         """
         Testing for returning the inbox of an author
@@ -146,9 +183,8 @@ class TestLikeAPI(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertTrue(response.data['items'][0]['type'], "Like")
-        self.assertTrue(response.data['items'][1]['type'], "Follow")
+        self.assertEqual(response.data['items'][0]['type'], "Follow")
+        self.assertEqual(response.data['items'][1]['type'], "like")
 
     def test_delete_inbox(self):
         """
