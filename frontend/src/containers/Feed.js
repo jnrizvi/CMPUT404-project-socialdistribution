@@ -95,10 +95,10 @@ function Feed(props) {
 
     const publicPaginationHandler = (direction) => {
         if (direction === 'left' && inboxPage !== 1) {
-            setPublicPage(inboxPage - 1);
+            setPublicPage(publicPage - 1);
             props.getPublicPosts(props.token, publicPage - 1);
         } else if (direction === 'right') {
-            setPublicPage(inboxPage + 1);
+            setPublicPage(publicPage + 1);
             props.getPublicPosts(props.token, publicPage + 1);
         }
     }
@@ -225,7 +225,9 @@ function Feed(props) {
                             comments={props.comments}
                             deleteInbox={deleteInbox}
                             inboxPage={inboxPage}
+                            publicPage={publicPage}
                             inboxPaginationHandler={inboxPaginationHandler}
+                            publicPaginationHandler={publicPaginationHandler}
                             commentPaginationHandler={commentPaginationHandler}
                         />
                     </div>

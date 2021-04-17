@@ -32,19 +32,8 @@ export default function Inbox(props) {
     const classes = useStyles();
 
     const [publicSelected, setPublicSelected] = React.useState(false);
-    const [inbox, setInbox] = React.useState( null );
 
-    React.useEffect(() => {
-        if (props.inbox) {
-            console.log('new posts?');
-            inboxUpdate();
-        }
-    }, [props.inbox]);
-
-    const inboxUpdate = () => {
-        console.log(props.inbox.items);
-        setInbox(
-            props.inbox.items !== undefined
+    let inbox = props.inbox.items !== undefined
                 ? props.inbox.items.map((d, i) => {
                     if (d.type === 'Follow') {
                         return <FollowRequest key={i} request={d} author={props.author} postFriendRequest={props.postFriendRequest}/>;
@@ -52,7 +41,7 @@ export default function Inbox(props) {
                         const conversion = d.id.split('/');
                         conversion[5] = 'post'
                         return <Post
-                                    key={i}
+                                    key={props.inbox.items[i].id + i}
                                     postData={d}
                                     postLiked={props.postLiked}
                                     commentLiked={props.commentLiked}
@@ -70,9 +59,46 @@ export default function Inbox(props) {
                         return <Comment key={i} data={d}/>;
                     }
                 })
-                : null
-        )
-    }
+                : null;
+    
+    let pub = props.publicPosts.length !== 0
+                ? props.publicPosts.map((d, i) => {
+                    if (d.type === 'Follow') {
+                        return <FollowRequest key={i} request={d} author={props.author} postFriendRequest={props.postFriendRequest}/>;
+                    } else if (d.type === 'post') {
+                        const conversion = d.id.split('/');
+                        conversion[5] = 'post'
+                        return <Post
+                                    key={props.publicPosts[i].id + i}
+                                    postData={d}
+                                    postLiked={props.postLiked}
+                                    commentLiked={props.commentLiked}
+                                    author={props.author}
+                                    createComment={props.createComment}
+                                    sharePost={props.sharePost}
+                                    editMode={false}
+                                    likes={props.likes[conversion.join('/')]}
+                                    comments={props.comments[d.id]}
+                                    commentPaginationHandler={props.commentPaginationHandler}
+                                />;
+                    } else if (d.type === 'like') {
+                        return <Like key={i} data={d}/>;
+                    } else if (d.type === 'comment') {
+                        return <Comment key={i} data={d}/>;
+                    }
+                })
+                : null;
+
+    const inboxComponent = <div>
+        {inbox}
+        <Pagination page={props.inboxPage} onClickHandler={props.inboxPaginationHandler}/>
+    </div>
+
+    const publicComponent = <div>
+        {pub}
+        <Pagination page={props.publicPage} onClickHandler={props.publicPaginationHandler}/>
+    </div>;
+
     
     return (
         <div>
@@ -97,8 +123,7 @@ export default function Inbox(props) {
                     <PublicIcon />
                 </ToggleButton>
             </div>
-            {inbox}
-            <Pagination page={props.inboxPage} onClickHandler={props.inboxPaginationHandler}/>
+            { publicSelected ? publicComponent : inboxComponent }
         </div>
     );
 }

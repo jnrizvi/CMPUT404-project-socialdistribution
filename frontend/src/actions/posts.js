@@ -128,7 +128,7 @@ export const getInbox = (authorId, token, page) => dispatch => {
 }
 
 export const getPublicPosts = (token, page) => dispatch => {
-    axios.get(`/author/posts?page=${page}`, {
+    axios.get(`/author/posts?page=${page}&size=2`, {
         headers: {
             'Authorization': `Basic ${token}`
         }

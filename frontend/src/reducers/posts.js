@@ -24,7 +24,7 @@ const initialState = {
     personal_posts: [],
     likes: {},
     comments: {},
-    publicPosts: {}
+    publicPosts: []
 }
 
 export default function(state = initialState, action) {
