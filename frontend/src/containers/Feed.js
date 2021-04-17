@@ -94,7 +94,7 @@ function Feed(props) {
     }
 
     const publicPaginationHandler = (direction) => {
-        if (direction === 'left' && inboxPage !== 1) {
+        if (direction === 'left' && publicPage !== 1) {
             setPublicPage(publicPage - 1);
             props.getPublicPosts(props.token, publicPage - 1);
         } else if (direction === 'right') {
@@ -175,8 +175,7 @@ function Feed(props) {
         }
 
         if (!_.isEmpty(props.inbox) && !_.isEmpty(props.publicPosts)) {
-            if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
-                setLikesLoaded(true);
+            if (props.inbox.items && props.inbox.items.length !== 0) {
                 _.forEach(props.inbox.items.concat(props.publicPosts), d => {
                     if (d.type === 'post' && d.visibility === 'FRIENDS') {
                         const post = d.id.split('/');
@@ -199,7 +198,7 @@ function Feed(props) {
                 });
             }
         }
-    });
+    }, [props.author, props.inbox, props.publicPosts]);
 
     return (
         <div 
