@@ -32,10 +32,10 @@ class PostsViewSet(viewsets.ModelViewSet):
 		"""
 		self.pagination_class = ResultsPagination
 		try:
-			posts = Post.objects.filter(visibility="PUBLIC", author_host__icontains=HOSTNAME)
+			posts = Post.objects.filter(visibility="PUBLIC", author__host__icontains=HOSTNAME)
 		except:
 			return Response(data="No posts found", status=status.HTTP_404_NOT_FOUND)
-		
+
 		# Paginate the returned list of all public posts
 		result = self.get_serializer(posts, many=True)
 		paginated_serialized_result = self.paginate_queryset(result.data)
