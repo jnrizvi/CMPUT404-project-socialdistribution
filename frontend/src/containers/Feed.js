@@ -67,11 +67,12 @@ function Feed(props) {
     const [loaded, setLoaded] = useState(false);
     const [likesLoaded, setLikesLoaded] = useState(false);
     const [inboxPage, setInboxPage] = useState(1);
+    const [publicPage, setPublicPage] = useState(1);
 
     const initialLoad = () => {
         if (!loaded) {
             props.getInbox(props.author_id, props.token, inboxPage);
-            props.getPublicPosts(props.token);
+            props.getPublicPosts(props.token, publicPage);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -89,6 +90,16 @@ function Feed(props) {
         } else if (direction === 'right') {
             setInboxPage(inboxPage + 1);
             props.getInbox(props.author_id, props.token, inboxPage+1);
+        }
+    }
+
+    const publicPaginationHandler = (direction) => {
+        if (direction === 'left' && inboxPage !== 1) {
+            setPublicPage(inboxPage - 1);
+            props.getPublicPosts(props.token, publicPage - 1);
+        } else if (direction === 'right') {
+            setPublicPage(inboxPage + 1);
+            props.getPublicPosts(props.token, publicPage + 1);
         }
     }
 

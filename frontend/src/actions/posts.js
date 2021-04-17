@@ -105,7 +105,7 @@ export const postNewPrivatePost = (post, recipient, token) => dispatch => {
 
 // Get all posts for activity feed
 export const getInbox = (authorId, token, page) => dispatch => {
-    axios.get(`/author/${authorId}/inbox?page=${page}`, {
+    axios.get(`/author/${authorId}/inbox?page=${page}&size=2`, {
         headers: {
             'Authorization': `Basic ${token}`
         }
@@ -127,8 +127,8 @@ export const getInbox = (authorId, token, page) => dispatch => {
     });
 }
 
-export const getPublicPosts = (token) => dispatch => {
-    axios.get(`/author/posts`, {
+export const getPublicPosts = (token, page) => dispatch => {
+    axios.get(`/author/posts?page=${page}`, {
         headers: {
             'Authorization': `Basic ${token}`
         }
