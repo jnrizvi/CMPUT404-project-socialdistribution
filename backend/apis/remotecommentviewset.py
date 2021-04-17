@@ -49,24 +49,23 @@ class RemoteCommentViewSet(viewsets.ModelViewSet):
 				s.auth = (node.remote_username, node.remote_password)
 				s.headers.update({'Content-Type':'application/json'})
 				params = {}
-
-				# Check if the request is asking for pagination and pass those query params along to the remote server
-				if request.query_params.get('page', False) or request.query_params.get('size', False):
-					if request.query_params.get('page', False):
-						params.update({'page': request.query_params.get('page')})
-					if request.query_params.get('size', False):
-						params.update({'size': request.query_params.get('size')})
-					# Send the request to the node with the pagination details
-					response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", params=params, json=body)
-				else:
-					# Send the request to the node without any pagination
-					response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", json=body)
-
 			except Exception:
 				return Response(data="Unable to get the comments from the remote server!", status=status.HTTP_400_BAD_REQUEST)
+
+			# Check if the request is asking for pagination and pass those query params along to the remote server
+			if request.query_params.get('page', False) or request.query_params.get('size', False):
+				if request.query_params.get('page', False):
+					params.update({'page': request.query_params.get('page')})
+				if request.query_params.get('size', False):
+					params.update({'size': request.query_params.get('size')})
+				# Send the request to the node with the pagination details
+				response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", params=params, json=body)
 			else:
-				# Ensure that the response returned was a 200 or 201 and if not send the error from the remote server back to the requesting user
-				if response_comment.status_code in [200, 201]:
-					return Response(response_comment.json(), status=response_comment.status_code)
-				else:
-					return Response(data="The remote server encountered an error getting the comments!", status=response_comment.status_code)
+				# Send the request to the node without any pagination
+				response_comment = s.get(node.host+"author/"+author_id+"/posts/"+post_id+"/comments", json=body)
+
+			# Ensure that the response returned was a 200 or 201 and if not send the error from the remote server back to the requesting user
+			if response_comment.status_code in [200, 201]:
+				return Response(response_comment.json(), status=response_comment.status_code)
+			else:
+				return Response(data="The remote server encountered an error getting the comments!", status=response_comment.status_code)
