@@ -61,7 +61,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 			elif comment_author_isLocal: # Here we check if the post exists in our database already, if it doesn't then we need to send a request for the post. Once we get the post we can create the comment on our server and the remote server
 				# Check if the post exists in the database
 				try:
-					post = Post.objects.filter(id=post_id).get() 
+					post = Post.objects.filter(id=post_id).get()
 					if not HOSTNAME in post.origin:
 						raise Exception
 				# Post is not a local post so send the request through to the other server
@@ -69,8 +69,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 					try:
 						if remote_comments_link:
 							comment_host = remote_comments_link.split('/')[2]
-							
-							# Ensure that the additional "comments" field exists, and then send the request based on the information 
+
+							# Ensure that the additional "comments" field exists, and then send the request based on the information
 							if not HOSTNAME in comment_host:
 								node = Node.objects.filter(host__icontains=comment_host).get()
 								s = requests.Session()
@@ -90,11 +90,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 						else:
 							return Response(data="The remote server encountered an error creating the comment!", status=response_comment.status_code)
 
-
-
-
-
-
 			# Create a new comment object, this will only run if the comment author is local and the post author is local or if the comment author is remote but the post author is local
 			comment = Comment(
 				author = comment_author,
@@ -105,7 +100,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 				post_author_id = author_id
 			)
 			comment.save()
-
 
 			# Issue an inbox object to the post author
 			inbox = Inbox(
@@ -146,7 +140,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 				paginated_serializer_data = self.paginate_queryset(serializer.data)
 
 				# Return the paginated and serialized data
-				return Response(paginated_serializer_data, status=status.HTTP_200_OK)		
+				return Response(paginated_serializer_data, status=status.HTTP_200_OK)
 			else:
 				# Return 400 Bad Request if the post id could not be retrieved form the requests url
 				return Response(status=status.HTTP_400_BAD_REQUEST, data="Unable to parse the post id from the request")
