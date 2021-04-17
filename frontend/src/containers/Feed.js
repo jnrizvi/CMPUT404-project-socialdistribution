@@ -67,11 +67,12 @@ function Feed(props) {
     const [loaded, setLoaded] = useState(false);
     const [likesLoaded, setLikesLoaded] = useState(false);
     const [inboxPage, setInboxPage] = useState(1);
+    const [publicPage, setPublicPage] = useState(1);
 
     const initialLoad = () => {
         if (!loaded) {
             props.getInbox(props.author_id, props.token, inboxPage);
-            props.getPublicPosts(props.token);
+            props.getPublicPosts(props.token, publicPage);
             props.getFriends(props.author_id, props.token);
             props.getFollowers(props.author_id, props.token);
             props.getFollowing(props.author_id, props.token);
@@ -89,6 +90,16 @@ function Feed(props) {
         } else if (direction === 'right') {
             setInboxPage(inboxPage + 1);
             props.getInbox(props.author_id, props.token, inboxPage+1);
+        }
+    }
+
+    const publicPaginationHandler = (direction) => {
+        if (direction === 'left' && publicPage !== 1) {
+            setPublicPage(publicPage - 1);
+            props.getPublicPosts(props.token, publicPage - 1);
+        } else if (direction === 'right') {
+            setPublicPage(publicPage + 1);
+            props.getPublicPosts(props.token, publicPage + 1);
         }
     }
 
@@ -164,8 +175,7 @@ function Feed(props) {
         }
 
         if (!_.isEmpty(props.inbox) && !_.isEmpty(props.publicPosts)) {
-            if (props.inbox.items && props.inbox.items.length !== 0 && !likesLoaded) {
-                setLikesLoaded(true);
+            if (props.inbox.items && props.inbox.items.length !== 0) {
                 _.forEach(props.inbox.items.concat(props.publicPosts), d => {
                     if (d.type === 'post' && d.visibility === 'FRIENDS') {
                         const post = d.id.split('/');
@@ -182,13 +192,13 @@ function Feed(props) {
                         if (d.id.includes(props.author.host)) {
                             props.getComments(d, props.token, 1);
                         } else {
-                            props.getCommentsRemote(d, props.token);
+                            props.getCommentsRemote(d, props.token, d.comments);
                         }
                     }
                 });
             }
         }
-    });
+    }, [props.author, props.inbox, props.publicPosts]);
 
     return (
         <div 
@@ -214,7 +224,9 @@ function Feed(props) {
                             comments={props.comments}
                             deleteInbox={deleteInbox}
                             inboxPage={inboxPage}
+                            publicPage={publicPage}
                             inboxPaginationHandler={inboxPaginationHandler}
+                            publicPaginationHandler={publicPaginationHandler}
                             commentPaginationHandler={commentPaginationHandler}
                         />
                     </div>

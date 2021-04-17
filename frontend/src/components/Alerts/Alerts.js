@@ -60,7 +60,7 @@ export class Alerts extends Component {
                     case POST_NEWPOST:
                         return alert.error(`${error.status} Error: Creating New Post Failed`);
                     case GET_INBOX:
-                        return alert.error(`${error.status} Error: Getting Inbox Failed`);
+                        return alert.error(`${error.status} Error: Getting Inbox Failed. No more pages to load`);
                     case POST_LIKE:
                         return alert.error(`${error.status} Error: Liking Post Failed`);
                     case POST_COMMENT:
@@ -86,7 +86,7 @@ export class Alerts extends Component {
                     case DESTROY_INBOX:
                         return alert.error(`${error.status} Error: Cannot Destroy Inbox`);          
                     case GET_PUBLIC_POSTS:
-                        return alert.error(`${error.status} Error: Cannot Get Public Posts`);              
+                        return alert.error(`${error.status} Error: Cannot Get Public Posts. No more pages to load`);              
                     default:
                         return alert.error(`${error.status} Error`);
                 }
